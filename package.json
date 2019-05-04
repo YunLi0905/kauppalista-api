@@ -1,0 +1,27 @@
+{
+  "name": "kauppalista-api",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node src/index.js",
+    "test": "cross-env NODE_ENV=test jest",
+    "watch": "cross-env NODE_ENV=development nodemon src/index.js"
+  },
+  "author": "Yun Li",
+  "license": "ISC",
+  "dependencies": {
+    "cross-env": "5.2.0",
+    "dotenv": "8.0.0",
+    "express": "4.16.4",
+    "mongoose": "5.5.5"
+  },
+  "devDependencies": {
+    "jest": "24.7.1",
+    "mongodb-memory-server": "5.1.0",
+    "nodemon": "1.19.0",
+    "supertest": "4.0.2"
+  },
+  "jest": {
+    "verbose": true
+  }
+}
