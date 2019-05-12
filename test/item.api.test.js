@@ -4,6 +4,8 @@ const supertest = require("supertest")
 const { app } = require("../src/app")
 const api = supertest(app)
 const db = new MongoMemoryServer()
+const { ItemModel } = require("../src/model")
+const data = require("./dummy.data")
 
 const URI = "/items"
 
@@ -23,12 +25,26 @@ afterAll(async () => {
   console.log("now disconnected from in-memory database")
 })
 
+beforeEach(async () => {
+  //clear database,poista kaikki
+  await ItemModel.deleteMany().exec()
+  // fill in dummy data
+  await Promise.all(
+    data.items.map(item => new ItemModel(item)).map(item => item.save())
+  )
+})
+
 describe(`GET ${URI}`, () => {
-  it("returns 500", async () => {
-    await api
+  it("returns all items in database as JSON with 200", async () => {
+    const expectedItems = await ItemModel.find().exec()
+    const expectedIds = expectedItems.map(item => item._id.toString())
+    const { body } = await api
       .get(URI)
-      .expect(500)
+      .expect(200)
       .expect("content-type", /application\/json/)
+
+    expect(body.length).toBe(expectedItems.length)
+    body.map(item => expect(expectedIds).toContain(item._id))
   })
 })
 
