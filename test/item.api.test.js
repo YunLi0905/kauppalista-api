@@ -49,10 +49,34 @@ describe(`GET ${URI}`, () => {
 })
 
 describe(`GET ${URI}/:id`, () => {
-  it("returns 500", async () => {
+  it("returns the correct item as JSON with 200 if id exists", async () => {
+    const items = await ItemModel.find().exec()
+    const expectedItem = pickRandomFromArray(items)
+    const { body } = await api
+      .get(`${URI}/${expectedItem._id}`)
+      .expect(200)
+      .expect("content-type", /application\/json/)
+    //
+    expect(body._id).toBe(expectedItem._id.toString())
+    expect(body.name).toBe(expectedItem.name)
+    expect(body.quantity).toBe(expectedItem.quantity)
+  })
+
+  it("returns 404 if id does not exist", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToDelete = pickRandomFromArray(items)
+    const { _id } = itemToDelete
+    await ItemModel.findByIdAndDelete(_id).exec()
     await api
-      .get(`${URI}/:id`)
-      .expect(500)
+      .get(`${URI}/${_id}`)
+      .expect(404)
+      .expect("content-type", /application\/json/)
+  })
+
+  it("returns 400 if id is invalid", async () => {
+    await api
+      .get(`${URI}/jsduhcoihcoaihcb`)
+      .expect(400)
       .expect("content-type", /application\/json/)
   })
 })
@@ -83,3 +107,8 @@ describe(`DELETE ${URI}`, () => {
       .expect("content-type", /application\/json/)
   })
 })
+
+const pickRandomFromArray = arr => {
+  const i = Math.floor(Math.random() * arr.length)
+  return arr[i]
+}

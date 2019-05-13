@@ -8,8 +8,19 @@ router.get("/", async (req, res, next) => {
 })
 
 router.get("/:id", (req, res, next) => {
-  res.status(500).json({ message: "not yet implemented!" })
+  const { id } = req.params
+  ItemModel.findById(id)
+    .then(item => {
+      if (!item) {
+        res.status(404).json({ message: "oops, item not found" })
+      } else {
+        res.status(200).json(item)
+      }
+    })
+    // .catch(error => next(error))
+    .catch(next)
 })
+
 router.post("/", (req, res, next) => {
   res.status(500).json({ message: "not yet implemented!" })
 })

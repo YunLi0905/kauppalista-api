@@ -5,6 +5,7 @@
 const express = require("express")
 
 const { itemRouter } = require("./routers")
+const { errorHandler } = require("./post")
 
 const app = express()
 
@@ -16,5 +17,7 @@ app.use(express.json())
 app.use("/items", itemRouter)
 
 //add post-processing middlewares
+
+app.use(errorHandler)
 
 module.exports = { app }
