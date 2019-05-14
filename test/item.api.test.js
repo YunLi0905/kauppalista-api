@@ -82,11 +82,76 @@ describe(`GET ${URI}/:id`, () => {
 })
 
 describe(`POST ${URI}`, () => {
-  it("returns 500", async () => {
+  it("create a new item with given quantity and returns 201 if input is valid", async () => {
+    const itemsBefore = await ItemModel.find().exec()
+    //1.hae kaikki DB:sta
+    const req = pickRandomFromArray(data.newItems)
+    //2.lähetä req API:n kautta
+
+    const { body } = await api
+      .post(URI)
+      .send(req)
+      .expect(201)
+      .expect("content-type", /application\/json/)
+
+    expect(body.name).toBe(req.name)
+    expect(body.quantity).toBe(req.quantity)
+    const itemsAfter = await ItemModel.find().exec()
+    expect(itemsAfter.length).toBe(itemsBefore.length + 1)
+  })
+
+  it("quantity defaults to 1 if not given in req", async () => {
+    const itemsBefore = await ItemModel.find().exec()
+    //1.hae kaikki DB:sta
+    const { quantity, ...req } = pickRandomFromArray(data.newItems)
+    //2.lähetä req API:n kautta
+
+    const { body } = await api
+      .post(URI)
+      .send(req)
+      .expect(201)
+      .expect("content-type", /application\/json/)
+
+    expect(body.name).toBe(req.name)
+    expect(body.quantity).toBe(1)
+    const itemsAfter = await ItemModel.find().exec()
+    expect(itemsAfter.length).toBe(itemsBefore.length + 1)
+  })
+
+  it("ignores 'done' given in req, always defaults to false", async () => {
+    const itemsBefore = await ItemModel.find().exec()
+    //1.hae kaikki DB:sta
+    const req = pickRandomFromArray(data.newItems)
+    const _req = { ...req, done: true }
+
+    //2.lähetä req API:n kautta
+
+    const { body } = await api
+      .post(URI)
+      .send(_req)
+      .expect(201)
+      .expect("content-type", /application\/json/)
+
+    expect(body.name).toBe(_req.name)
+    expect(body.done).toBe(false)
+    const itemsAfter = await ItemModel.find().exec()
+    expect(itemsAfter.length).toBe(itemsBefore.length + 1)
+  })
+
+  it("fails and returns 400 if 'name' missing", async () => {
+    const itemsBefore = await ItemModel.find().exec()
+    //1.hae kaikki DB:sta
+
+    //2.lähetä req API:n kautta
+    const { name, ...req } = pickRandomFromArray(data.newItems)
     await api
       .post(URI)
-      .expect(500)
+      .send(req)
+      .expect(400)
       .expect("content-type", /application\/json/)
+
+    const itemsAfter = await ItemModel.find().exec()
+    expect(itemsAfter.length).toBe(itemsBefore.length)
   })
 })
 

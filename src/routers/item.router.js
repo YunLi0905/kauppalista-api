@@ -22,7 +22,10 @@ router.get("/:id", (req, res, next) => {
 })
 
 router.post("/", (req, res, next) => {
-  res.status(500).json({ message: "not yet implemented!" })
+  new ItemModel(req.body)
+    .save()
+    .then(item => res.status(201).json(item))
+    .catch(next)
 })
 
 router.patch("/:id", (req, res, next) => {

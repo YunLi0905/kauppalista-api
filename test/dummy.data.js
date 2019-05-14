@@ -18,4 +18,21 @@ const items = [
   }
 ]
 
-module.exports = { items }
+const newItems = [
+  {
+    name: "mansikkoita",
+    quantity: 100
+  },
+
+  {
+    name: "tomatti",
+    quantity: 73
+  },
+
+  {
+    name: "astianpesuaine",
+    quantity: 5
+  }
+]
+
+module.exports = { items, newItems }
