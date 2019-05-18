@@ -156,11 +156,65 @@ describe(`POST ${URI}`, () => {
 })
 
 describe(`PATCH ${URI}/:id`, () => {
-  it("returns 500", async () => {
+  it("updates 'name' of item if id exists", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToPatch = pickRandomFromArray(items)
+    const { _id, name } = itemToPatch
+    const patchedName = name + " patched"
     await api
-      .patch(`${URI}/:id`)
-      .expect(500)
+      .patch(`${URI}/${_id}`)
+      .send({ name: patchedName })
+      .expect(200)
       .expect("content-type", /application\/json/)
+
+    const patchedItem = await ItemModel.findById(_id).exec()
+    expect(patchedItem.name).toBe(patchedName)
+  })
+
+  it("updates 'quantity' of item if id exists", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToPatch = pickRandomFromArray(items)
+    const { _id, quantity } = itemToPatch
+    const patchedQuantity = quantity + 3
+    await api
+      .patch(`${URI}/${_id}`)
+      .send({ quantity: patchedQuantity })
+      .expect(200)
+      .expect("content-type", /application\/json/)
+
+    const patchedItem = await ItemModel.findById(_id).exec()
+    expect(patchedItem.quantity).toBe(patchedQuantity)
+  })
+
+  it("updates both 'name' and 'quantity of item if id exists", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToPatch = pickRandomFromArray(items)
+    const { _id, name, quantity } = itemToPatch
+    const patchedName = name + " patched"
+    const patchedQuantity = quantity + 3
+    await api
+      .patch(`${URI}/${_id}`)
+      .send({ name: patchedName, quantity: patchedQuantity })
+      .expect(200)
+      .expect("content-type", /application\/json/)
+
+    const patchedItem = await ItemModel.findById(_id).exec()
+    expect(patchedItem.name).toBe(patchedName)
+    expect(patchedItem.quantity).toBe(patchedQuantity)
+  })
+
+  it("updates 'done' of item if id exists", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToPatch = pickRandomFromArray(items)
+    const { _id, done } = itemToPatch
+    await api
+      .patch(`${URI}/${_id}`)
+      .send({ done: !done })
+      .expect(200)
+      .expect("content-type", /application\/json/)
+
+    const patchedItem = await ItemModel.findById(_id).exec()
+    expect(patchedItem.done).toBe(!done)
   })
 })
 

@@ -11,8 +11,7 @@ const schema = new Schema({
   },
   done: {
     type: Boolean,
-    default: false,
-    set: _ => false
+    default: false
   }
 })
 

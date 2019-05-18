@@ -22,14 +22,19 @@ router.get("/:id", (req, res, next) => {
 })
 
 router.post("/", (req, res, next) => {
-  new ItemModel(req.body)
+  const { done, ...rest } = req.body
+  new ItemModel(rest)
     .save()
     .then(item => res.status(201).json(item))
     .catch(next)
 })
 
 router.patch("/:id", (req, res, next) => {
-  res.status(500).json({ message: "not yet implemented!" })
+  const { id } = req.params
+
+  ItemModel.findByIdAndUpdate(id, req.body).then(item =>
+    res.status(200).json(item)
+  )
 })
 
 router.delete("/:id", (req, res, next) => {
