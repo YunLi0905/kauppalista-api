@@ -22,6 +22,10 @@
     "supertest": "4.0.2"
   },
   "jest": {
+    "rootDir": "test",
+    "setupFilesAfterEnv": [
+      "<rootDir>/setup.js"
+    ],
     "testEnvironment": "node",
     "verbose": true
   }
