@@ -153,6 +153,34 @@ describe(`POST ${URI}`, () => {
     const itemsAfter = await ItemModel.find().exec()
     expect(itemsAfter.length).toBe(itemsBefore.length)
   })
+
+  it("fails if quantity is less than 1", async () => {
+    const req = pickRandomFromArray(data.newItems)
+    await Promise.all(
+      [0, -1, -13, 0.1].map(quantity => {
+        const _req = { ...req, quantity }
+        return api
+          .post(URI)
+          .send(_req)
+          .expect(400)
+          .expect("content-type", /application\/json/)
+      })
+    )
+  })
+
+  it("fails if quantity is not a number", async () => {
+    const req = pickRandomFromArray(data.newItems)
+    await Promise.all(
+      ["1j", "aksj", "  ", null].map(quantity => {
+        const _req = { ...req, quantity }
+        return api
+          .post(URI)
+          .send(_req)
+          .expect(400)
+          .expect("content-type", /application\/json/)
+      })
+    )
+  })
 })
 
 describe(`PATCH ${URI}/:id`, () => {
@@ -186,23 +214,6 @@ describe(`PATCH ${URI}/:id`, () => {
     expect(patchedItem.quantity).toBe(patchedQuantity)
   })
 
-  it("updates both 'name' and 'quantity of item if id exists", async () => {
-    const items = await ItemModel.find().exec()
-    const itemToPatch = pickRandomFromArray(items)
-    const { _id, name, quantity } = itemToPatch
-    const patchedName = name + " patched"
-    const patchedQuantity = quantity + 3
-    await api
-      .patch(`${URI}/${_id}`)
-      .send({ name: patchedName, quantity: patchedQuantity })
-      .expect(200)
-      .expect("content-type", /application\/json/)
-
-    const patchedItem = await ItemModel.findById(_id).exec()
-    expect(patchedItem.name).toBe(patchedName)
-    expect(patchedItem.quantity).toBe(patchedQuantity)
-  })
-
   it("updates 'done' of item if id exists", async () => {
     const items = await ItemModel.find().exec()
     const itemToPatch = pickRandomFromArray(items)
@@ -215,6 +226,71 @@ describe(`PATCH ${URI}/:id`, () => {
 
     const patchedItem = await ItemModel.findById(_id).exec()
     expect(patchedItem.done).toBe(!done)
+  })
+
+  it("returns 404 if id does not exist", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToDelete = pickRandomFromArray(items)
+    const { _id } = itemToDelete
+    await ItemModel.findByIdAndDelete(_id).exec()
+    await api
+      .patch(`${URI}/${_id}`)
+      .send({ done: !itemToDelete.done })
+      .expect(404)
+      .expect("content-type", /application\/json/)
+  })
+
+  it("returns 400 if id is invalid", async () => {
+    await api
+      .patch(`${URI}/jsduhcoihcoaihcb`)
+      .send({ quantity: 112 })
+      .expect(400)
+      .expect("content-type", /application\/json/)
+  })
+
+  it("fails if trying to patch empty name", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToPatch = pickRandomFromArray(items)
+    const { _id } = itemToPatch
+    await Promise.all(
+      [null, "", "  "].map(name => {
+        return api
+          .patch(`${URI}/${_id}`)
+          .send({ name })
+          .expect(400)
+          .expect("content-type", /application\/json/)
+      })
+    )
+  })
+
+  it("fails if trying to patch invalid quantity", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToPatch = pickRandomFromArray(items)
+    const { _id } = itemToPatch
+    await Promise.all(
+      [null, "", "  ", 0, -1, 0.1, "hello"].map(quantity => {
+        return api
+          .patch(`${URI}/${_id}`)
+          .send({ quantity })
+          .expect(400)
+          .expect("content-type", /application\/json/)
+      })
+    )
+  })
+
+  it("fails if trying to patch non-boolean done", async () => {
+    const items = await ItemModel.find().exec()
+    const itemToPatch = pickRandomFromArray(items)
+    const { _id } = itemToPatch
+    await Promise.all(
+      [null, "", "  ", -1, 0.1, "hello"].map(done => {
+        return api
+          .patch(`${URI}/${_id}`)
+          .send({ done })
+          .expect(400)
+          .expect("content-type", /application\/json/)
+      })
+    )
   })
 })
 

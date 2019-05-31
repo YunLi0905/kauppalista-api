@@ -32,9 +32,15 @@ router.post("/", (req, res, next) => {
 router.patch("/:id", (req, res, next) => {
   const { id } = req.params
 
-  ItemModel.findByIdAndUpdate(id, req.body).then(item =>
-    res.status(200).json(item)
-  )
+  ItemModel.findByIdAndUpdate(id, req.body, { runValidators: true })
+    .then(item => {
+      if (!item) {
+        res.status(404).json({ message: "oops, item not found" })
+      } else {
+        res.status(200).json(item)
+      }
+    })
+    .catch(next)
 })
 
 router.delete("/:id", (req, res, next) => {
