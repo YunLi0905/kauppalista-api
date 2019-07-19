@@ -1,15 +1,15 @@
 const errorHandler = (err, req, res, next) => {
+  console.error(err)
   const { name } = err
   switch (name) {
     case "CastError": {
-      res.status(400).json(err)
+      return res.status(400).json(err)
     }
-
     case "ValidationError": {
-      res.status(400).json(err)
+      return res.status(400).json(err)
     }
     default: {
-      res.status(500).json(err)
+      return res.status(500).json(err)
     }
   }
 }
