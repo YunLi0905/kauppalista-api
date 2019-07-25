@@ -3,7 +3,7 @@ const { app } = require("./app")
 const mongoose = require("mongoose")
 const MODE = process.env.NODE_ENV
 
-const PORT = 4000
+const PORT = process.env.PORT || 4000
 const DB_URI = process.env.DB_URI
 app.listen(PORT, () => {
   console.log(`express app now listening on port ${PORT} on ${MODE} mode`)
